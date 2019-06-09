@@ -1,4 +1,4 @@
-package wiki.concurrency;
+package wiki.concurrency.jcip.chapter7;
 
 public class TaskRunner extends Thread {
     private final Runnable runnable;

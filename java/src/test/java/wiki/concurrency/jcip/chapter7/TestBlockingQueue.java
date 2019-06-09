@@ -1,6 +1,7 @@
-package wiki.concurrency;
+package wiki.concurrency.jcip.chapter7;
 
 import org.junit.Test;
+import wiki.concurrency.jcip.chapter7.TaskRunner;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -9,8 +10,8 @@ import java.util.function.Supplier;
 
 import static org.junit.Assert.assertEquals;
 
-public class TestBrokenBlockingQueue {
-    class QueueProducer<T> extends BrokenTaskRunner {
+public class TestBlockingQueue {
+    class QueueProducer<T> extends TaskRunner {
         QueueProducer(final BlockingQueue<T> queue, final Supplier<T> supplier) {
             super(() -> {
                         try {
@@ -23,7 +24,7 @@ public class TestBrokenBlockingQueue {
         }
     }
 
-    class QueueConsumer<T> extends BrokenTaskRunner {
+    class QueueConsumer<T> extends TaskRunner {
         QueueConsumer(final BlockingQueue<T> queue, final Consumer<T> consumerFunction) {
             super(() -> {
                         try {
@@ -37,7 +38,7 @@ public class TestBrokenBlockingQueue {
     }
 
     @Test
-    public void brokenProducerConsumer() {
+    public void producerConsumer() {
         BlockingQueue<Integer> queue = new ArrayBlockingQueue<>(100);
 
         QueueProducer<Integer> producer = new QueueProducer<>(
@@ -50,11 +51,8 @@ public class TestBrokenBlockingQueue {
                 System.out::println
         );
 
-        Thread producerThread = new Thread(producer);
-        Thread consumerThread = new Thread(consumer);
-
-        producerThread.start();
-        consumerThread.start();
+        producer.start();
+        consumer.start();
 
         new Thread(() -> {
             try {
@@ -68,20 +66,20 @@ public class TestBrokenBlockingQueue {
         }).start();
 
         try {
-            producerThread.join(600);
-            consumerThread.join(100);
+            producer.join();
+            consumer.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
         assertEquals(
                 "Producer thread terminated",
-                Thread.State.TERMINATED, producerThread.getState()
+                Thread.State.TERMINATED, producer.getState()
         );
 
         assertEquals(
-                "Consumer thread couldn't terminate, because it's waiting on the blocking queue 'take' method",
-                Thread.State.WAITING, consumerThread.getState()
+                "Consumer thread also terminated",
+                Thread.State.TERMINATED, consumer.getState()
         );
     }
 }

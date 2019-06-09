@@ -1,4 +1,4 @@
-package wiki.concurrency;
+package wiki.concurrency.jcip.chapter7;
 
 public class BrokenTaskRunner implements Runnable {
     private final Runnable runnable;
