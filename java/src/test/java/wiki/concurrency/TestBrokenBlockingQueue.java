@@ -9,8 +9,8 @@ import java.util.function.Supplier;
 
 import static org.junit.Assert.assertEquals;
 
-public class TestBlockingQueue {
-    class QueueProducer<T> extends TaskRunner {
+public class TestBrokenBlockingQueue {
+    class QueueProducer<T> extends BrokenTaskRunner {
         QueueProducer(final BlockingQueue<T> queue, final Supplier<T> supplier) {
             super(() -> {
                         try {
@@ -23,7 +23,7 @@ public class TestBlockingQueue {
         }
     }
 
-    class QueueConsumer<T> extends TaskRunner {
+    class QueueConsumer<T> extends BrokenTaskRunner {
         QueueConsumer(final BlockingQueue<T> queue, final Consumer<T> consumerFunction) {
             super(() -> {
                         try {
@@ -37,7 +37,7 @@ public class TestBlockingQueue {
     }
 
     @Test
-    public void producerConsumer() {
+    public void brokenProducerConsumer() {
         BlockingQueue<Integer> queue = new ArrayBlockingQueue<>(100);
 
         QueueProducer<Integer> producer = new QueueProducer<>(
@@ -50,8 +50,11 @@ public class TestBlockingQueue {
                 System.out::println
         );
 
-        producer.start();
-        consumer.start();
+        Thread producerThread = new Thread(producer);
+        Thread consumerThread = new Thread(consumer);
+
+        producerThread.start();
+        consumerThread.start();
 
         new Thread(() -> {
             try {
@@ -65,20 +68,20 @@ public class TestBlockingQueue {
         }).start();
 
         try {
-            producer.join();
-            consumer.join();
+            producerThread.join(600);
+            consumerThread.join(100);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
         assertEquals(
                 "Producer thread terminated",
-                Thread.State.TERMINATED, producer.getState()
+                Thread.State.TERMINATED, producerThread.getState()
         );
 
         assertEquals(
-                "Consumer thread also terminated",
-                Thread.State.TERMINATED, consumer.getState()
+                "Consumer thread couldn't terminate, because it's waiting on the blocking queue 'take' method",
+                Thread.State.WAITING, consumerThread.getState()
         );
     }
 }

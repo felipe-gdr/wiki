@@ -1,10 +1,8 @@
 package wiki.concurrency;
 
-public class TaskRunner implements Runnable {
+public class TaskRunner extends Thread {
     private final Runnable runnable;
     private final long sleep;
-
-    private volatile boolean cancelled;
 
     public TaskRunner(Runnable runnable) {
         this.runnable = runnable;
@@ -18,19 +16,27 @@ public class TaskRunner implements Runnable {
 
     @Override
     public void run() {
-        while (!this.cancelled) {
+        while (true) {
+//            while (!Thread.currentThread().isInterrupted()) {
             this.runnable.run();
 
             try {
+                /*
+                 * "Some methods, such as wait, sleep, and join, take such requests seriously, throwing an exception
+                 * when they receive an interrupt request or encounter an already set interrupt status upon entry"
+                 *
+                 * Java Concurrency in Practice, Chapter 7
+                 */
                 Thread.sleep(this.sleep);
             } catch (InterruptedException e) {
+                System.out.println("Exiting " + this.getClass().getSimpleName());
                 Thread.currentThread().interrupt();
+                return;
             }
         }
-        System.out.println("Exiting " + this.getClass().getSimpleName());
     }
 
     public void cancel() {
-        this.cancelled = true;
+        interrupt();
     }
 }
