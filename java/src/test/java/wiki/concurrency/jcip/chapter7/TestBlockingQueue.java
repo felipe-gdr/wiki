@@ -1,7 +1,9 @@
 package wiki.concurrency.jcip.chapter7;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
 import wiki.concurrency.jcip.chapter7.TaskRunner;
+import wiki.metrics.MetricsServer;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -11,16 +13,20 @@ import java.util.function.Supplier;
 import static org.junit.Assert.assertEquals;
 
 public class TestBlockingQueue {
+    private static final String METRIC = "queue_size";
+    private static final MetricsServer metricsServer = new MetricsServer();
+
     class QueueProducer<T> extends TaskRunner {
         QueueProducer(final BlockingQueue<T> queue, final Supplier<T> supplier) {
             super(() -> {
                         try {
                             queue.put(supplier.get());
+                            metricsServer.increaseGauge(METRIC);
                         } catch (InterruptedException e) {
                             Thread.currentThread().interrupt();
                         }
                     },
-                    100);
+                    10);
         }
     }
 
@@ -29,17 +35,24 @@ public class TestBlockingQueue {
             super(() -> {
                         try {
                             consumerFunction.accept(queue.take());
+                            metricsServer.decreaseGauge(METRIC);
                         } catch (InterruptedException e) {
                             Thread.currentThread().interrupt();
                         }
                     },
-                    0);
+                    20);
         }
+    }
+
+
+    @BeforeClass
+    public static void init() {
+        metricsServer.start();
     }
 
     @Test
     public void producerConsumer() {
-        BlockingQueue<Integer> queue = new ArrayBlockingQueue<>(100);
+        BlockingQueue<Integer> queue = new ArrayBlockingQueue<>(10000);
 
         QueueProducer<Integer> producer = new QueueProducer<>(
                 queue,
@@ -56,7 +69,7 @@ public class TestBlockingQueue {
 
         new Thread(() -> {
             try {
-                Thread.sleep(500);
+                Thread.sleep(60000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
