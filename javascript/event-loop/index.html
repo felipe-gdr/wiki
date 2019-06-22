@@ -1,0 +1,14 @@
+<html>
+    <body>
+        <h1>Open the console</h1>
+        <p>
+            The order of console messages is different, depending on whether the button is clicked via the UI or programmatically.
+        </p>
+        <p>
+            When the button is clicked programmatically, the events are dispatched <strong>synchronously</strong>. So this means the JS stack only gets empty when both listeners return, only then the microtasks (Promises) can run.
+        </p>
+        <button id="button">Click me</button>
+        <button id="fakeButton">Simulate JS execution</button>
+        <script src="index.js"></script>
+    </body>
+</html>
