@@ -1,28 +1,15 @@
 const express = require('express');
-const usersRouter = require('./users-router');
+const { logger, errorCatcher, errorHandler } = require('./middlewares');
+const usersRouter = require('./routers/users');
+const { closeClient } = require('./data');
 
 const app = express();
 
-const logger = (req, res, next) => {
-    console.log('request received');
-    next();
-}
-
-const errorCatcher = (req, res, next) => {
-    console.log(req.query)
-    if(req.query.forceError) {
-        next('A forced error from middleware')
-    } else {
-        next();
-    }
-};
-
-const errorHandler = (err, req, res, next) => {
-    res.send('An error happened: ' + err);
-};
-
+// Applies the middlewares
 app.use(logger, errorCatcher, errorHandler);
+app.use(express.json())
 
+// Applies the "users" router
 app.use('/users', usersRouter);
 
 app.get('/', logger, (req, res) => {
@@ -33,9 +20,29 @@ app.get('/error', logger, (req, res) => {
     throw new Error('A Forced error!')
 })
 
-app.get('/maybeError', logger, (req, res) => {
-    res.send('No error this time');
-});
-
-
 app.listen(666);
+
+const closeClientWrapper = async () => {
+    try {
+        const msg = await closeClient();
+        console.log(msg);
+        process.exit(0);
+    } catch(err) {
+        console.log(`Error shuting down node applicationn: ${err}`)
+        process.exit(1);
+    }
+}
+
+//catches ctrl+c event
+process.on('SIGINT', closeClientWrapper);
+
+// catches "kill pid" (for example: nodemon restart)
+process.on('SIGUSR1', closeClientWrapper);
+process.on('SIGUSR2', closeClientWrapper);
+
+// catches uncaught exceptions
+process.on('uncaughtException', err => {
+    console.trace(`Unexpected error: ${err}`);
+
+    closeClientWrapper()
+});
