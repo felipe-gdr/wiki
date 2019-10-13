@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "wiki.grpc.helloworld";
+option java_outer_classname = "HelloWorldProto";
+option objc_class_prefix = "RTG";
+
+package helloworld;
+
+service HelloWorld {
+    rpc Echo(SimpleMessage) returns (SimpleMessage) {}
+}
+
+message SimpleMessage {
+    string text = 1;
+}
+
