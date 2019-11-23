@@ -1,4 +1,4 @@
-package wiki.kotlin.coursera.kfjd
+package wiki
 
 /**
  * Kotlin playground from week 2: Control structures
