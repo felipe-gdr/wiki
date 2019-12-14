@@ -32,7 +32,7 @@ fun hasAdjacent(num: Int): Boolean {
         }
     }
 
-    return false;
+    return false
 }
 
 fun hasAdjacentPart2(num: Int): Boolean {
