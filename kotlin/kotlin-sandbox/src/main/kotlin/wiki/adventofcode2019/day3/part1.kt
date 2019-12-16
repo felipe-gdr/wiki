@@ -177,7 +177,7 @@ fun tests() {
 
 fun main() {
     tests()
-    val resource: URL = object {}.javaClass.getResource("input.txt")
+    val resource: URL = object {}.javaClass.getResource("/day3/input.txt")
     val rawInput = File(resource.toURI()).readText()
     println(exec(rawInput))
 }
