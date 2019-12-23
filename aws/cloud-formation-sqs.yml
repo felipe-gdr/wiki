@@ -1,0 +1,80 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Test Cloud Formation config that creates an SQS queue that subscribes to an SNS topic on a different AWS account 
+Parameters:
+  ExternalTopicArn:
+    Type: String
+    Default: arn:aws:sns:us-west-2:143481676413:test-sns-MessageTopic-14TDYN01Y9E9N 
+    Description: Arn for the SNS topic hosted on the external account to which the SQS queue will subscribe 
+Resources:
+  SNSToSQSEncryptionKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: "A CMK key that allows SNS topics to write messages to encrypted SQS queues"
+      EnableKeyRotation: True
+      KeyPolicy:
+        Version: 2012-10-17
+        Statement:
+          - Sid: Enable IAM User Permissions
+            Effect: Allow
+            Principal:
+              AWS: !Ref AWS::AccountId
+            Action: "kms:*"
+            Resource: "*"
+          - Sid: Allow SQS queue to perform actions against the key
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "sqs.amazonaws.com"
+            Resource: "*"
+            Action:
+              - "kms:Encrypt"
+              - "kms:Decrypt"
+              - "kms:ReEncrypt"
+              - "kms:GenerateDataKey*"
+              - "kms:DescribeKey"
+          - Sid: Mininal permissions for SNS topics to send messages to encrypted SQS queues
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "sns.amazonaws.com"
+            Action:
+              - "kms:GenerateDataKey*"
+              - "kms:Decrypt"
+            Resource: "*"
+  SNSToSQSEncryptionKeyAlias:
+    Type: 'AWS::KMS::Alias'
+    Properties:
+      AliasName: alias/sns-to-sqs-encryption-key 
+      TargetKeyId: !Ref SNSToSQSEncryptionKey
+  Queue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: encrypted-sqs 
+      KmsMasterKeyId: !Ref SNSToSQSEncryptionKeyAlias 
+      KmsDataKeyReusePeriodSeconds: 60
+  ConsumerQueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties: 
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement: 
+          Sid: Allow-Send-Message
+          Effect: Allow
+          Principal: "*" 
+          Action: SQS:SendMessage
+          Resource: "*"
+          Condition:
+            ArnEquals: 
+              aws:SourceArn: !Ref ExternalTopicArn 
+      Queues: 
+        - !Ref Queue
+  SnsSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Protocol: sqs
+      Endpoint: !GetAtt Queue.Arn
+      Region: us-west-2
+      TopicArn: !Ref ExternalTopicArn 
+Outputs:
+  QueueArn:
+    Value: !Ref Queue

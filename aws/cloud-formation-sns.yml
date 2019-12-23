@@ -1,0 +1,28 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Test Cloud Formation config that creates a SQS that subscribes to an existing SNS topic
+Parameters:
+  ExternalAccountId:
+    Type: String
+    Default: 206992854489 
+    Description: AWS account id for the external account where the SQS consumer queue will be created
+Resources:
+  MessageTopic:
+    Type: AWS::SNS::Topic
+  AllowExternalAccessPolicy:
+    Type: AWS::SNS::TopicPolicy
+    Properties: 
+        PolicyDocument:
+            Statement:
+                Sid: Allow-External-Access
+                Effect: Allow
+                Principal:
+                    AWS: !Ref ExternalAccountId 
+                Action: 
+                    - "sns:Subscribe"
+                    - "sns:GetTopicAttributes"
+                Resource: !Ref MessageTopic
+        Topics: 
+            - !Ref MessageTopic 
+Outputs:
+  InternalQueueArn:
+    Value: !Ref QueueInternal 
