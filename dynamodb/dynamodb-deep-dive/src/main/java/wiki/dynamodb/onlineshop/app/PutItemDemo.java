@@ -15,6 +15,17 @@ public class PutItemDemo {
 
         ItemDao itemDao = new ItemDao(client);
 
+//        putItem(itemDao);
+
+        final ShopItem item = getItem(itemDao);
+        System.out.println(item);
+    }
+
+    private static ShopItem getItem(ItemDao itemDao) {
+        return itemDao.getShopItem("1");
+    }
+
+    private static void putItem(ItemDao itemDao) {
         ShopItem shopItem = new ShopItem(
                 "1",
                 "Spoon",

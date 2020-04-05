@@ -2,6 +2,8 @@ package wiki.dynamodb.onlineshop.dao.lowlevel;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
+import com.amazonaws.services.dynamodbv2.model.GetItemRequest;
+import com.amazonaws.services.dynamodbv2.model.GetItemResult;
 import com.amazonaws.services.dynamodbv2.model.PutItemRequest;
 import wiki.dynamodb.onlineshop.domain.ShopItem;
 
@@ -26,5 +28,26 @@ public class ItemDao {
         PutItemRequest putItemRequest = new PutItemRequest("ShopItem", itemMap);
 
         this.dynamoDBClient.putItem(putItemRequest);
+    }
+
+    public ShopItem getShopItem(final String id) {
+        Map<String, AttributeValue> key = new HashMap<>();
+
+        key.put("id", new AttributeValue().withS(id));
+
+        GetItemRequest request = new GetItemRequest()
+                .withTableName("ShopItem")
+                .withKey(key)
+                .withConsistentRead(true);
+
+        final GetItemResult getItemResult = this.dynamoDBClient.getItem(request);
+        final Map<String, AttributeValue> item = getItemResult.getItem();
+
+        return new ShopItem(
+                item.get("id").getS(),
+                item.get("name").getS(),
+                item.get("description").getS(),
+                Integer.valueOf(item.get("amount").getN())
+        );
     }
 }
