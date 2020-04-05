@@ -4,7 +4,10 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.GetItemRequest;
 import com.amazonaws.services.dynamodbv2.model.GetItemResult;
+import com.amazonaws.services.dynamodbv2.model.ItemCollectionSizeLimitExceededException;
+import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughputExceededException;
 import com.amazonaws.services.dynamodbv2.model.PutItemRequest;
+import com.amazonaws.services.dynamodbv2.model.TableNotFoundException;
 import wiki.dynamodb.onlineshop.domain.ShopItem;
 
 import java.util.HashMap;
@@ -27,7 +30,16 @@ public class ItemDao {
 
         PutItemRequest putItemRequest = new PutItemRequest("ShopItem", itemMap);
 
-        this.dynamoDBClient.putItem(putItemRequest);
+        try {
+            this.dynamoDBClient.putItem(putItemRequest);
+        } catch (TableNotFoundException ex) {
+            // ignore
+        } catch (ProvisionedThroughputExceededException ex) {
+            // ignore
+        } catch (ItemCollectionSizeLimitExceededException ex) {
+            // ignore
+        }
+        // There are many other exceptions
     }
 
     public ShopItem getShopItem(final String id) {
