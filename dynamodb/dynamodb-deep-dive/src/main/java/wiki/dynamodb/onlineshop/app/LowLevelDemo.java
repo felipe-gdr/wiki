@@ -6,7 +6,7 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import wiki.dynamodb.onlineshop.dao.lowlevel.ItemDao;
 import wiki.dynamodb.onlineshop.domain.ShopItem;
 
-public class PutItemDemo {
+public class LowLevelDemo {
     public static void main(String[] args) {
         AmazonDynamoDB client = AmazonDynamoDBClientBuilder
                 .standard()
@@ -26,12 +26,12 @@ public class PutItemDemo {
     }
 
     private static void putItem(ItemDao itemDao) {
-        ShopItem shopItem = new ShopItem(
-                "1",
-                "Spoon",
-                "Musical spoon",
-                1001
-        );
+        ShopItem shopItem = new ShopItem();
+
+        shopItem.setId("1");
+        shopItem.setName("Spoon");
+        shopItem.setDescription("Musical Spoon");
+        shopItem.setAmount(1001);
 
         itemDao.putShopItem(shopItem);
     }

@@ -55,11 +55,13 @@ public class ItemDao {
         final GetItemResult getItemResult = this.dynamoDBClient.getItem(request);
         final Map<String, AttributeValue> item = getItemResult.getItem();
 
-        return new ShopItem(
-                item.get("id").getS(),
-                item.get("name").getS(),
-                item.get("description").getS(),
-                Integer.valueOf(item.get("amount").getN())
-        );
+        final ShopItem shopItem = new ShopItem();
+
+        shopItem.setId(item.get("id").getS());
+        shopItem.setName(item.get("name").getS());
+        shopItem.setDescription(item.get("description").getS());
+        shopItem.setAmount(Integer.valueOf(item.get("amount").getS()));
+
+        return shopItem;
     }
 }
