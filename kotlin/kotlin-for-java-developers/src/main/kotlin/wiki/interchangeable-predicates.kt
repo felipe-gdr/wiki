@@ -1,6 +1,7 @@
 package wiki
 
 import java.lang.IllegalStateException
+import java.util.*
 
 fun List<Int>.allNonZero() =  all { it != 0 }
 fun List<Int>.allNonZero1() =  none { it == 0 }
@@ -34,4 +35,8 @@ fun main(args: Array<String>) {
     list2.containsZero() eq true
     list2.containsZero1() eq true
     list2.containsZero2() eq true
+
+    Date().time.toInt()
+
+    (Math.random() * 100000).toInt()
 }
