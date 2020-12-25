@@ -1,4 +1,5 @@
 import React, { Fragment } from "react";
+import { colorScale, basicTypes } from "./colors";
 import * as d3 from "d3";
 
 const arcFn = d3
@@ -8,38 +9,66 @@ const arcFn = d3
   .startAngle(({ startAngle }) => startAngle)
   .endAngle(({ endAngle }) => endAngle);
 
-const totalInnerRadius = 50;
+const totalInnerRadius = 20;
 const totalOuterRadius = 300;
 
 export const Chart = ({ data, config: { highestScore } }) => {
-  const slices = data.length;
+  const pillarsCount = data.length;
 
   return (
     <svg viewBox="-320 -320 640 640" style={{ maxWidth: 640 }}>
-      {Array.from({ length: slices }, (_, i) => {
-        const startAngle = (i / slices) * 2 * Math.PI;
-        const endAngle = ((i + 1) / slices) * 2 * Math.PI;
-        const maxDepth = data[i].length * highestScore;
-        let currentLevel = 0;
-        return (
-          <Fragment key={i}>
-            {data[i].map((value, j) => {
-              const radiusSize = (totalOuterRadius - totalInnerRadius) / maxDepth;
-              const innerRadius = radiusSize * currentLevel + totalInnerRadius;
-              const outerRadius = innerRadius + (radiusSize * value);
-              currentLevel += value;
-
-              return (
-                <path
-                  key={j}
-                  stroke="white"
-                  fill={d3.interpolateRainbow(i / slices)}
-                  d={arcFn({ startAngle, endAngle, innerRadius, outerRadius })}
-                ></path>
-              );
-            })}
-          </Fragment>
+      {Array.from({ length: pillarsCount }, (_, i) => {
+        const sliceStartAngle = (i / pillarsCount) * 2 * Math.PI;
+        const sliceEndAngle = ((i + 1) / pillarsCount) * 2 * Math.PI;
+        const areasCount = data[i].length;
+        const interpolate = d3.interpolateNumber(
+          sliceStartAngle,
+          sliceEndAngle
         );
+
+        return data[i]
+          .map((area, j) => {
+            const startAngle = interpolate(j / areasCount);
+            const endAngle = interpolate((j + 1) / areasCount);
+
+            const maxDepth = area.length * highestScore;
+            let currentLevel = 0;
+            const color = colorScale(basicTypes[i])(j / data[i].length);
+            return (
+              <Fragment key={j}>
+                {area.map((value, k) => {
+                  const radiusSize =
+                    (totalOuterRadius - totalInnerRadius) / maxDepth;
+                  const innerRadius =
+                    radiusSize * currentLevel + totalInnerRadius;
+                  const outerRadius = innerRadius + radiusSize * value;
+                  currentLevel += value;
+
+                //   console.log('->', k / area.length)
+                //   console.log('->', colorScale(i)(k / area.length))
+
+                  return (
+                    <path
+                      key={k}
+                      stroke="white"
+                      fill={color}
+                      d={arcFn({
+                        startAngle,
+                        endAngle,
+                        innerRadius,
+                        outerRadius,
+                      })}
+                    ></path>
+                  );
+                })}
+              </Fragment>
+            );
+          })
+          .reduce((acc, item) => {
+            acc.push(item);
+
+            return acc;
+          }, []);
       })}
     </svg>
   );
