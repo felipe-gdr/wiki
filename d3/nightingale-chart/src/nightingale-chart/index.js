@@ -1,9 +1,9 @@
 import React, { Fragment } from "react";
 import { colorScale, basicTypes } from "./colors";
-import { Arc } from "./styled";
+import { Arc, Boundaries } from "./styled";
 import * as d3 from "d3";
 
-const width = 500;
+const width = 300;
 
 const arcFn = d3
   .arc()
@@ -17,53 +17,81 @@ const arcFn = d3
 const totalInnerRadius = 20;
 const totalOuterRadius = width;
 
-export const Chart = ({ data, config: { highestScore } }) => {
-  const pillarsCount = data.length;
+export const Chart = ({
+  data,
+  onHover,
+  config: { highestScore },
+  selectedItem,
+}) => {
+  const { expectations } = data;
+  const expectationsCount = expectations.length;
 
   return (
-    <svg viewBox={`-${width} -${width} ${width * 2} ${width * 2}`} style={{ maxWidth: width }}>
-      {Array.from({ length: pillarsCount }, (_, i) => {
-        const sliceStartAngle = (i / pillarsCount) * 2 * Math.PI;
-        const sliceEndAngle = ((i + 1) / pillarsCount) * 2 * Math.PI;
-        const areasCount = data[i].length;
+    <svg
+      viewBox={`-${width + 4} -${width + 4} ${(width + 4) * 2} ${
+        (width + 4) * 2
+      }`}
+      style={{ maxWidth: width }}
+    >
+      <Boundaries
+        key="boundary"
+        d={arcFn({
+          startAngle: 0,
+          endAngle: Math.PI * 2,
+          innerRadius: 0,
+          outerRadius: totalOuterRadius,
+        })}
+      />
+      {expectations.map((expectation, i) => {
+        const sliceStartAngle = (i / expectationsCount) * 2 * Math.PI;
+        const sliceEndAngle = ((i + 1) / expectationsCount) * 2 * Math.PI;
+        const { highLevels } = expectation;
+        const highLevelsCount = highLevels.length;
         const interpolate = d3.interpolateNumber(
           sliceStartAngle,
           sliceEndAngle
         );
 
-        return data[i]
-          .map((area, j) => {
-            const startAngle = interpolate(j / areasCount);
-            const endAngle = interpolate((j + 1) / areasCount);
+        return highLevels
+          .map((highLevel, j) => {
+            const { specifics } = highLevel;
+            const startAngle = interpolate(j / highLevelsCount);
+            const endAngle = interpolate((j + 1) / highLevelsCount);
 
-            const maxDepth = area.length * highestScore;
+            const maxDepth = specifics.length * highestScore;
             let currentLevel = 0;
-            const color = colorScale(basicTypes[i])(j / data[i].length);
+            const color = colorScale(basicTypes[i])(j / expectationsCount);
             return (
               <Fragment key={j}>
-                {area.map((value, k) => {
-                  const padding = 4;
-                  const radiusSize =
-                    (totalOuterRadius - totalInnerRadius) / maxDepth;
-                  const innerRadius =
-                    radiusSize * currentLevel + totalInnerRadius;
-                  const outerRadius = innerRadius + radiusSize * value;
-                  currentLevel += value;
+                {specifics
+                  .filter(({ value }) => value !== null)
+                  .map((specific, k) => {
+                    const { value } = specific;
+                    const padding = 0.007 * width;
+                    const radiusSize =
+                      (totalOuterRadius - totalInnerRadius) / maxDepth;
+                    const innerRadius =
+                      radiusSize * currentLevel + totalInnerRadius;
+                    const outerRadius = innerRadius + radiusSize * value;
+                    currentLevel += value;
 
-                  return (
-                    <Arc
-                      onMouseEnter={() => console.log(k)}
-                      key={k}
-                      fill={color}
-                      d={arcFn({
-                        startAngle,
-                        endAngle,
-                        innerRadius: innerRadius + padding,
-                        outerRadius,
-                      })}
-                    />
-                  );
-                })}
+                    return (
+                      <Arc
+                        key={k}
+                        selected={
+                          selectedItem && specific.name === selectedItem.name
+                        }
+                        onMouseEnter={() => onHover(specific)}
+                        fill={color}
+                        d={arcFn({
+                          startAngle,
+                          endAngle,
+                          innerRadius: innerRadius + padding,
+                          outerRadius,
+                        })}
+                      />
+                    );
+                  })}
               </Fragment>
             );
           })

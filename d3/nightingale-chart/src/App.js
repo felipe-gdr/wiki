@@ -1,38 +1,27 @@
+import { useState, useCallback, useMemo } from "react";
 import "./App.css";
 import { Chart } from "./nightingale-chart";
-
-const randomInt = max => Math.floor(Math.random() * (max)) + 1;
+import { sampleData } from "./data";
 
 const highestScore = 4;
-const pillarsCount = 4;
-const areasMax = 8;
-const subAreasMax = 5;
-
-const pascalData = () => {
-  const result = [];
-
-  for(let x = 0; x < pillarsCount; x++) {
-    const areas = [];
-
-    for(let y = 0; y < randomInt(areasMax); y++) {
-      const subAreas = [];
-      for(let y = 0; y < randomInt(subAreasMax); y++) {
-        subAreas.push(randomInt(highestScore));
-      }
-
-      areas.push(subAreas)
-    }
-
-    result.push(areas);
-  }
-
-  return result;
-};
 
 function App() {
+  const [item, setItem] = useState(null);
+  const onHover = useCallback((value) => setItem(value), [setItem]);
+
   return (
     <div className="App">
-      <Chart data={pascalData()} config={{ highestScore }}/>
+      <Chart
+        data={sampleData}
+        config={{ highestScore }}
+        onHover={onHover}
+        selectedItem={item}
+      />
+      {item && (
+        <div>
+          {item.name}: {item.value}
+        </div>
+      )}
     </div>
   );
 }
