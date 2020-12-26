@@ -1,22 +1,27 @@
 import React, { Fragment } from "react";
 import { colorScale, basicTypes } from "./colors";
+import { Arc } from "./styled";
 import * as d3 from "d3";
+
+const width = 500;
 
 const arcFn = d3
   .arc()
   .innerRadius(({ innerRadius }) => innerRadius)
   .outerRadius(({ outerRadius }) => outerRadius)
   .startAngle(({ startAngle }) => startAngle)
-  .endAngle(({ endAngle }) => endAngle);
+  .endAngle(({ endAngle }) => endAngle)
+  .padAngle(Math.PI / 200)
+  .padRadius(0.45 * width);
 
 const totalInnerRadius = 20;
-const totalOuterRadius = 300;
+const totalOuterRadius = width;
 
 export const Chart = ({ data, config: { highestScore } }) => {
   const pillarsCount = data.length;
 
   return (
-    <svg viewBox="-320 -320 640 640" style={{ maxWidth: 640 }}>
+    <svg viewBox={`-${width} -${width} ${width * 2} ${width * 2}`} style={{ maxWidth: width }}>
       {Array.from({ length: pillarsCount }, (_, i) => {
         const sliceStartAngle = (i / pillarsCount) * 2 * Math.PI;
         const sliceEndAngle = ((i + 1) / pillarsCount) * 2 * Math.PI;
@@ -37,6 +42,7 @@ export const Chart = ({ data, config: { highestScore } }) => {
             return (
               <Fragment key={j}>
                 {area.map((value, k) => {
+                  const padding = 4;
                   const radiusSize =
                     (totalOuterRadius - totalInnerRadius) / maxDepth;
                   const innerRadius =
@@ -44,21 +50,18 @@ export const Chart = ({ data, config: { highestScore } }) => {
                   const outerRadius = innerRadius + radiusSize * value;
                   currentLevel += value;
 
-                //   console.log('->', k / area.length)
-                //   console.log('->', colorScale(i)(k / area.length))
-
                   return (
-                    <path
+                    <Arc
+                      onMouseEnter={() => console.log(k)}
                       key={k}
-                      stroke="white"
                       fill={color}
                       d={arcFn({
                         startAngle,
                         endAngle,
-                        innerRadius,
+                        innerRadius: innerRadius + padding,
                         outerRadius,
                       })}
-                    ></path>
+                    />
                   );
                 })}
               </Fragment>
