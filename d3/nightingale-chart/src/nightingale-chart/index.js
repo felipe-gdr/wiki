@@ -43,23 +43,32 @@ export const Chart = ({
         })}
       />
       {expectations.map((expectation, i) => {
-        const sliceStartAngle = (i / expectationsCount) * 2 * Math.PI;
-        const sliceEndAngle = ((i + 1) / expectationsCount) * 2 * Math.PI;
+        const expectationStartAngle = (i / expectationsCount) * 2 * Math.PI;
+        const expectationEndAngle = ((i + 1) / expectationsCount) * 2 * Math.PI;
         const { highLevels } = expectation;
         const highLevelsCount = highLevels.length;
-        const interpolate = d3.interpolateNumber(
-          sliceStartAngle,
-          sliceEndAngle
+        const interpolateExpectations = d3.interpolateNumber(
+          expectationStartAngle,
+          expectationEndAngle
         );
 
         return highLevels
           .map((highLevel, j) => {
             const { specifics } = highLevel;
-            const startAngle = interpolate(j / highLevelsCount);
-            const endAngle = interpolate((j + 1) / highLevelsCount);
+            const specificsCount = specifics.filter(
+              ({ value }) => value !== null
+            ).length;
+            const highLevelStartAngle = interpolateExpectations(
+              j / highLevelsCount
+            );
+            const highLevelEndAngle = interpolateExpectations(
+              (j + 1) / highLevelsCount
+            );
+            const interpolateHighLevel = d3.interpolateNumber(
+              highLevelStartAngle,
+              highLevelEndAngle
+            );
 
-            const maxDepth = specifics.length * highestScore;
-            let currentLevel = 0;
             const color = colorScale(basicTypes[i])(j / expectationsCount);
             return (
               <Fragment key={j}>
@@ -69,11 +78,14 @@ export const Chart = ({
                     const { value } = specific;
                     const padding = 0.007 * width;
                     const radiusSize =
-                      (totalOuterRadius - totalInnerRadius) / maxDepth;
-                    const innerRadius =
-                      radiusSize * currentLevel + totalInnerRadius;
+                      (totalOuterRadius - totalInnerRadius) / highestScore;
+                    const innerRadius = totalInnerRadius;
                     const outerRadius = innerRadius + radiusSize * value;
-                    currentLevel += value;
+
+                    const startAngle = interpolateHighLevel(k / specificsCount);
+                    const endAngle = interpolateHighLevel(
+                      (k + 1) / specificsCount
+                    );
 
                     return (
                       <Arc
