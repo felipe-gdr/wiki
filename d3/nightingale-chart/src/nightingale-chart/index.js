@@ -134,12 +134,7 @@ export const Chart = ({
                   })}
               </Fragment>
             );
-          })
-          .reduce((acc, item) => {
-            acc.push(item);
-
-            return acc;
-          }, []);
+          });
       })}
     </svg>
   );

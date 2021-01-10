@@ -253,3 +253,13 @@ export const sampleData = {
     },
   ],
 };
+
+export const maxedOutData = {
+  expectations: sampleData.expectations.map((expectation) => ({
+    ...expectation,
+    highLevels: expectation.highLevels.map((highLevel) => ({
+      ...highLevel,
+      specifics: highLevel.specifics.map((specific) => ({ ...specific, value: 4 })),
+    })),
+  })),
+};
