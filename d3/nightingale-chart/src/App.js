@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback } from "react";
 import "./App.css";
 import { Chart } from "./nightingale-chart";
 import { sampleData } from "./data";
@@ -7,16 +7,16 @@ const highestScore = 4;
 
 function App() {
   const [item, setItem] = useState(null);
-  const [mode, setMode] = useState("1");
+  const [mode, setMode] = useState("HIGH_LEVEL");
   const onHover = useCallback((value) => setItem(value), [setItem]);
   const toggleMode = useCallback(
-    () => setMode((currentValue) => (currentValue === "1" ? "2" : "1")),
+    () => setMode((currentValue) => (currentValue === "HIGH_LEVEL" ? "SPECIFICS" : "HIGH_LEVEL")),
     [setMode]
   );
 
   return (
     <div className="App">
-      <button onClick={toggleMode}>toggle mode</button>
+      <button onClick={toggleMode}>Visualization type: {mode}</button>
       <Chart
         data={sampleData}
         config={{ highestScore }}

@@ -18,7 +18,7 @@ const totalInnerRadius = 20;
 const totalOuterRadius = width;
 
 const getRadiusSize = ({ mode, maxDepth, highestScore }) => {
-  if (mode === "1") {
+  if (mode === "HIGH_LEVEL") {
     return (totalOuterRadius - totalInnerRadius) / maxDepth;
   } else {
     return (totalOuterRadius - totalInnerRadius) / highestScore;
@@ -26,7 +26,7 @@ const getRadiusSize = ({ mode, maxDepth, highestScore }) => {
 };
 
 const getInnerRadius = ({ mode, radiusSize, currentLevel }) => {
-  if (mode === "1") {
+  if (mode === "HIGH_LEVEL") {
     return radiusSize * currentLevel + totalInnerRadius;
   } else {
     return totalInnerRadius;
@@ -34,7 +34,7 @@ const getInnerRadius = ({ mode, radiusSize, currentLevel }) => {
 };
 
 const getStartAndEndAngles = ({ mode, k, specificsCount, highLevelStartAngle, highLevelEndAngle }) => {
-  if(mode === '1') {
+  if(mode === 'HIGH_LEVEL') {
     return [highLevelStartAngle, highLevelEndAngle];
   } else {
     const interpolateHighLevel = d3.interpolateNumber(
@@ -54,7 +54,7 @@ export const Chart = ({
   onHover,
   config: { highestScore },
   selectedItem,
-  mode = "1",
+  mode = "HIGH_LEVEL",
 }) => {
   const { expectations } = data;
   const expectationsCount = expectations.length;
