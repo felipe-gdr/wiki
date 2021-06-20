@@ -254,12 +254,16 @@ export const sampleData = {
   ],
 };
 
-export const maxedOutData = {
+const createData = valueFn => ({
   expectations: sampleData.expectations.map((expectation) => ({
     ...expectation,
     highLevels: expectation.highLevels.map((highLevel) => ({
       ...highLevel,
-      specifics: highLevel.specifics.map((specific) => ({ ...specific, value: 4 })),
+      specifics: highLevel.specifics.map((specific) => ({ ...specific, value: valueFn() })),
     })),
   })),
-};
+});
+
+export const randomData = createData(() => Math.floor(Math.random() * 4) + 1);
+
+export const maxedOutData = createData(() => 4);

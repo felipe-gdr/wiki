@@ -1,7 +1,7 @@
 import React from "react";
 import { storiesOf } from "@storybook/react";
 import { action } from "@storybook/addon-actions";
-import { sampleData, maxedOutData } from "../data";
+import { sampleData, maxedOutData, randomData } from "../data";
 
 import { Chart } from "./index";
 
@@ -17,18 +17,22 @@ const defaultProps = {
   selectedItem: null,
 };
 
-storiesOf("Nightgale chart | High level", module)
+storiesOf("Nightgale chart | High level & Specifics comparison", module)
   .add("Sample data", () => (
-    <Chart data={sampleData} {...defaultProps} mode="HIGH_LEVEL" />
+    <div>
+      <Chart data={sampleData} {...defaultProps} mode="HIGH_LEVEL" />
+      <Chart data={sampleData} {...defaultProps} mode="SPECIFICS" />
+    </div>
+  ))
+  .add("Random", () => (
+    <div>
+      <Chart data={randomData} {...defaultProps} mode="HIGH_LEVEL" />
+      <Chart data={randomData} {...defaultProps} mode="SPECIFICS" />
+    </div>
   ))
   .add("100%", () => (
-    <Chart data={maxedOutData} {...defaultProps} mode="HIGH_LEVEL" />
-  ));
-
-storiesOf("Nightgale chart | Specifics", module)
-  .add("Sample data", () => (
-    <Chart data={sampleData} {...defaultProps} mode="SPECIFICS" />
-  ))
-  .add("100%", () => (
-    <Chart data={maxedOutData} {...defaultProps} mode="SPECIFICS" />
+    <div>
+      <Chart data={maxedOutData} {...defaultProps} mode="HIGH_LEVEL" />
+      <Chart data={maxedOutData} {...defaultProps} mode="SPECIFICS" />
+    </div>
   ));
