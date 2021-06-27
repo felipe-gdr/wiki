@@ -1,0 +1,50 @@
+  type Query {
+      issues(filter: IssueFilter): [Issue!]
+      comments: [Comment!]
+      issue(id: ID!): Issue
+  }
+
+  type Mutation {
+      addIssue(input: IssueInput!): Issue
+  }
+
+  input IssueFilter {
+    text: String
+    type: IssueType
+  }
+
+  type Issue {
+      id: ID!
+      title: String
+      description: String
+      type: IssueType
+      comments: [Comment!]
+      author: User
+  }
+
+  input IssueInput {
+      title: String!
+      description: String!
+      type: IssueType!
+      date: Date!
+  }
+
+  type Comment {
+      id: ID!
+      content: String
+      dateAdded: Date
+  }
+
+  type User {
+      id: ID!
+      name: String
+      avatar: String
+  }
+
+  enum IssueType {
+      TASK,
+      BUG,
+      EPIC
+  }
+
+  scalar Date 

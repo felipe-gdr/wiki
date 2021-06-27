@@ -1,0 +1,28 @@
+{
+  "name": "graphql-workshop",
+  "version": "1.0.0",
+  "description": "Repository containing exercises for the GraphQL Workshop",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@bitbucket.org/atlassian/graphql-workshop.git"
+  },
+  "keywords": [
+    "graphql"
+  ],
+  "author": "",
+  "license": "ISC",
+  "homepage": "https://bitbucket.org/atlassian/graphql-workshop#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "express-graphql": "^0.9.0",
+    "graphql": "^15.0.0",
+    "graphql-tools": "^4.0.7",
+    "uuid": "^7.0.3"
+  }
+}

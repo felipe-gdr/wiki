@@ -3,21 +3,22 @@ import './App.css';
 import { graphql } from 'babel-plugin-relay/macro';
 import {loadQuery, RelayEnvironmentProvider, usePreloadedQuery,} from 'react-relay/hooks';
 import RelayEnvironment from './RelayEnvironment';
-import type { AppIssuesQuery } from './__generated__/AppIssuesQuery.graphql'
+import type { AppIssueQuery } from './__generated__/AppIssueQuery.graphql'
+import { IssueComponent } from './issue'
 
 // Define a query
-const IssuesQuery = graphql`
-    query AppIssuesQuery {
-        issues {
-            title 
+const IssueQuery = graphql`
+    query AppIssueQuery($issueId: ID!) {
+        issue(id: $issueId) {
+            ...issue
         }
     }
 `;
 
 // Immediately load the query as our app starts. For a real app, we'd move this
 // into our routing configuration, preloading data as we transition to new routes.
-const preloadedQuery = loadQuery(RelayEnvironment, IssuesQuery, {
-    /* query variables */
+const preloadedQuery = loadQuery(RelayEnvironment, IssueQuery, {
+    issueId: 'd287e4d4-2ad1-42e6-a957-1ed544efe584'
 });
 
 // Inner component that reads the preloaded query results via `usePreloadedQuery()`.
@@ -29,14 +30,12 @@ const preloadedQuery = loadQuery(RelayEnvironment, IssuesQuery, {
 // - If the query failed, it throws the failure error. For simplicity we aren't
 //   handling the failure case here.
 function App(props: any) {
-    const data = usePreloadedQuery<AppIssuesQuery>(IssuesQuery, props.preloadedQuery);
+    const data = usePreloadedQuery<AppIssueQuery>(IssueQuery, props.preloadedQuery);
 
     return (
         <div className="App">
             <header className="App-header">
-                {data?.issues?.map(issue => 
-                    <p>{issue.title}</p>
-                )}
+                {data.issue && <IssueComponent issue={data.issue} /> }
             </header>
         </div>
     );
